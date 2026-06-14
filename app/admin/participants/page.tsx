@@ -1,14 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function AdminParticipantsPage() {
+  const router = useRouter();
+
+  const [authorized, setAuthorized] = useState(false);
   const [participants, setParticipants] = useState<any[]>([]);
 
   async function loadParticipants() {
     const res = await fetch("/api/admin/participants");
     setParticipants(await res.json());
+  }
+
+  function logout() {
+    localStorage.removeItem("admin-auth");
+    router.push("/admin-login");
   }
 
   function downloadQR(qrToken: string) {
@@ -23,14 +32,44 @@ export default function AdminParticipantsPage() {
   }
 
   useEffect(() => {
+    const auth = localStorage.getItem("admin-auth");
+
+    if (auth !== "true") {
+      router.push("/admin-login");
+      return;
+    }
+
+    setAuthorized(true);
     loadParticipants();
-  }, []);
+  }, [router]);
+
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <main style={{ maxWidth: 1100, margin: "60px auto", fontFamily: "sans-serif" }}>
-      <h1>Partecipanti</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
+        <div>
+          <h1>Partecipanti</h1>
+          <p>Elenco completo con badge ID, QR token, punti e QR scaricabile.</p>
+        </div>
 
-      <p>Elenco completo con badge ID, QR token, punti e QR scaricabile.</p>
+        <button onClick={logout} style={{ padding: 10 }}>
+          Logout
+        </button>
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <a href="/admin">← Torna ad Admin Panel</a>
+      </div>
 
       <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 24 }}>
         <thead>
@@ -46,7 +85,10 @@ export default function AdminParticipantsPage() {
 
         <tbody>
           {participants.map((p) => {
-            const playerUrl = `http://localhost:3000/player/${p.qrToken}`;
+            const baseUrl =
+              process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+
+            const playerUrl = `${baseUrl}/player/${p.qrToken}`;
 
             return (
               <tr key={p.id}>

@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
+  const router = useRouter();
+
+  const [authorized, setAuthorized] = useState(false);
+
   const [participants, setParticipants] = useState<any[]>([]);
   const [stations, setStations] = useState<any[]>([]);
   const [badgeId, setBadgeId] = useState("");
@@ -29,13 +34,10 @@ export default function AdminPage() {
     setQuizzes(await qRes.json());
   }
 
-  async function logout() {
-    await fetch("/api/admin/logout", {
-        method: "POST",
-    });
-
-    window.location.href = "/admin-login";
- }
+  function logout() {
+    localStorage.removeItem("admin-auth");
+    router.push("/admin-login");
+  }
 
   async function addParticipant() {
     if (!badgeId) return;
@@ -121,16 +123,30 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
+    const auth = localStorage.getItem("admin-auth");
+
+    if (auth !== "true") {
+      router.push("/admin-login");
+      return;
+    }
+
+    setAuthorized(true);
     loadData();
-  }, []);
+  }, [router]);
+
+  if (!authorized) {
+    return null;
+  }
 
   return (
     <main style={{ maxWidth: 900, margin: "60px auto", fontFamily: "sans-serif" }}>
-      <h1>Admin Panel</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1>Admin Panel</h1>
 
-      <button onClick={logout} style={{ padding: 10 }}>
-        Logout
-      </button>
+        <button onClick={logout} style={{ padding: 10 }}>
+          Logout
+        </button>
+      </div>
 
       <section style={{ marginTop: 32 }}>
         <h2>Nuovo partecipante</h2>
@@ -149,6 +165,8 @@ export default function AdminPage() {
 
       <section style={{ marginTop: 40 }}>
         <h2>Partecipanti</h2>
+
+        <p>Totale partecipanti: {participants.length}</p>
 
         <a href="/admin/participants" target="_blank">
           Gestione partecipanti e QR
@@ -253,10 +271,33 @@ export default function AdminPage() {
         />
 
         <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-          <input value={answerA} onChange={(e) => setAnswerA(e.target.value)} placeholder="Risposta A" style={{ padding: 12 }} />
-          <input value={answerB} onChange={(e) => setAnswerB(e.target.value)} placeholder="Risposta B" style={{ padding: 12 }} />
-          <input value={answerC} onChange={(e) => setAnswerC(e.target.value)} placeholder="Risposta C" style={{ padding: 12 }} />
-          <input value={answerD} onChange={(e) => setAnswerD(e.target.value)} placeholder="Risposta D" style={{ padding: 12 }} />
+          <input
+            value={answerA}
+            onChange={(e) => setAnswerA(e.target.value)}
+            placeholder="Risposta A"
+            style={{ padding: 12 }}
+          />
+
+          <input
+            value={answerB}
+            onChange={(e) => setAnswerB(e.target.value)}
+            placeholder="Risposta B"
+            style={{ padding: 12 }}
+          />
+
+          <input
+            value={answerC}
+            onChange={(e) => setAnswerC(e.target.value)}
+            placeholder="Risposta C"
+            style={{ padding: 12 }}
+          />
+
+          <input
+            value={answerD}
+            onChange={(e) => setAnswerD(e.target.value)}
+            placeholder="Risposta D"
+            style={{ padding: 12 }}
+          />
         </div>
 
         <select
@@ -279,10 +320,18 @@ export default function AdminPage() {
         <h2>Quiz creati</h2>
 
         {quizzes.map((quiz) => (
-          <div key={quiz.id} style={{ border: "1px solid #ddd", padding: 16, marginTop: 12 }}>
+          <div
+            key={quiz.id}
+            style={{
+              border: "1px solid #ddd",
+              padding: 16,
+              marginTop: 12,
+            }}
+          >
             <h3>{quiz.title}</h3>
             <p>Slug: {quiz.slug}</p>
             <p>Domande: {quiz.questions?.length || 0}</p>
+
             <a href={`/quiz/${quiz.slug}?code=001`} target="_blank">
               Prova quiz come partecipante 001
             </a>

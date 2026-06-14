@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Participant {
+  id          Int      @id @default(autoincrement())
+  badgeId     String   @unique
+  qrToken     String   @unique
+  totalPoints Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  stationScores StationScore[]
+  quizAttempts  QuizAttempt[]
+}
+
+model Station {
+  id     Int     @id @default(autoincrement())
+  slug   String  @unique
+  name   String
+  points Int
+  active Boolean @default(true)
+
+  scores StationScore[]
+}
+
+model StationScore {
+  id            Int      @id @default(autoincrement())
+  participantId Int
+  stationId     Int
+  points        Int
+  createdAt     DateTime @default(now())
+
+  participant Participant @relation(fields: [participantId], references: [id])
+  station     Station     @relation(fields: [stationId], references: [id])
+
+  @@unique([participantId, stationId])
+}
+
+model Quiz {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id     Int    @id @default(autoincrement())
+  quizId Int
+  text   String
+  points Int    @default(1)
+  order  Int
+
+  quiz      Quiz           @relation(fields: [quizId], references: [id])
+  answers   QuizAnswer[]
+  responses QuizResponse[]
+}
+
+model QuizAnswer {
+  id         Int     @id @default(autoincrement())
+  questionId Int
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int
+
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+}
+
+model QuizAttempt {
+  id            Int       @id @default(autoincrement())
+  participantId Int
+  quizId        Int
+  score         Int       @default(0)
+  completed     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
+
+  participant Participant    @relation(fields: [participantId], references: [id])
+  quiz        Quiz           @relation(fields: [quizId], references: [id])
+  responses   QuizResponse[]
+
+  @@unique([participantId, quizId])
+}
+
+model QuizResponse {
+  id         Int     @id @default(autoincrement())
+  attemptId  Int
+  questionId Int
+  answerId   Int
+  isCorrect  Boolean
+  points     Int     @default(0)
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id])
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, questionId])
+}

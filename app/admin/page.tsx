@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { QRCodeCanvas } from "qrcode.react";
 
 export default function AdminPage() {
   const [participants, setParticipants] = useState<any[]>([]);
@@ -25,9 +24,9 @@ export default function AdminPage() {
     const sRes = await fetch("/api/admin/stations");
     const qRes = await fetch("/api/admin/quizzes");
 
-    setQuizzes(await qRes.json());
     setParticipants(await pRes.json());
     setStations(await sRes.json());
+    setQuizzes(await qRes.json());
   }
 
   async function addParticipant() {
@@ -50,6 +49,69 @@ export default function AdminPage() {
     loadData();
   }
 
+  async function addQuiz() {
+    if (!quizTitle) return;
+
+    const res = await fetch("/api/admin/quizzes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: quizTitle,
+        slug: quizSlug,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Errore creazione quiz");
+      return;
+    }
+
+    setQuizTitle("");
+    setQuizSlug("");
+    loadData();
+  }
+
+  async function addQuestion() {
+    if (!selectedQuizId || !questionText || !answerA || !answerB) {
+      alert("Seleziona quiz, domanda e almeno due risposte");
+      return;
+    }
+
+    const answers = [answerA, answerB, answerC, answerD].filter(Boolean);
+
+    const res = await fetch(`/api/admin/quizzes/${selectedQuizId}/questions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: questionText,
+        points: Number(questionPoints),
+        answers,
+        correctIndex: Number(correctIndex),
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Errore creazione domanda");
+      return;
+    }
+
+    setQuestionText("");
+    setQuestionPoints("1");
+    setAnswerA("");
+    setAnswerB("");
+    setAnswerC("");
+    setAnswerD("");
+    setCorrectIndex("0");
+
+    loadData();
+  }
+
   useEffect(() => {
     loadData();
   }, []);
@@ -68,10 +130,7 @@ export default function AdminPage() {
           style={{ padding: 12, fontSize: 18 }}
         />
 
-        <button
-          onClick={addParticipant}
-          style={{ padding: 12, marginLeft: 8 }}
-        >
+        <button onClick={addParticipant} style={{ padding: 12, marginLeft: 8 }}>
           Aggiungi
         </button>
       </section>
@@ -80,7 +139,7 @@ export default function AdminPage() {
         <h2>Partecipanti</h2>
 
         <a href="/admin/participants" target="_blank">
-            Gestione partecipanti e QR
+          Gestione partecipanti e QR
         </a>
       </section>
 
@@ -122,160 +181,102 @@ export default function AdminPage() {
         </a>
       </section>
 
-     <section style={{ marginTop: 40 }}>
-  <h2>Crea quiz</h2>
+      <section style={{ marginTop: 40 }}>
+        <h2>Crea quiz</h2>
 
-  <input
-    value={quizTitle}
-    onChange={(e) => setQuizTitle(e.target.value)}
-    placeholder="Titolo quiz"
-    style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-  />
+        <input
+          value={quizTitle}
+          onChange={(e) => setQuizTitle(e.target.value)}
+          placeholder="Titolo quiz"
+          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
+        />
 
-  <input
-    value={quizSlug}
-    onChange={(e) => setQuizSlug(e.target.value)}
-    placeholder="slug opzionale es. quiz-1"
-    style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-  />
+        <input
+          value={quizSlug}
+          onChange={(e) => setQuizSlug(e.target.value)}
+          placeholder="slug opzionale es. quiz-1"
+          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
+        />
 
-  <button onClick={addQuiz} style={{ padding: 12 }}>
-    Crea quiz
-  </button>
-</section>
+        <button onClick={addQuiz} style={{ padding: 12 }}>
+          Crea quiz
+        </button>
+      </section>
 
-<section style={{ marginTop: 40 }}>
-  <h2>Aggiungi domanda</h2>
+      <section style={{ marginTop: 40 }}>
+        <h2>Aggiungi domanda</h2>
 
-  <select
-    value={selectedQuizId}
-    onChange={(e) => setSelectedQuizId(e.target.value)}
-    style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-  >
-    <option value="">Seleziona quiz</option>
-    {quizzes.map((q) => (
-      <option key={q.id} value={q.id}>
-        {q.title}
-      </option>
-    ))}
-  </select>
+        <select
+          value={selectedQuizId}
+          onChange={(e) => setSelectedQuizId(e.target.value)}
+          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
+        >
+          <option value="">Seleziona quiz</option>
+          {quizzes.map((q) => (
+            <option key={q.id} value={q.id}>
+              {q.title}
+            </option>
+          ))}
+        </select>
 
-  <input
-    value={questionText}
-    onChange={(e) => setQuestionText(e.target.value)}
-    placeholder="Testo domanda"
-    style={{ padding: 12, fontSize: 18, display: "block", marginTop: 12, width: "100%" }}
-  />
+        <input
+          value={questionText}
+          onChange={(e) => setQuestionText(e.target.value)}
+          placeholder="Testo domanda"
+          style={{
+            padding: 12,
+            fontSize: 18,
+            display: "block",
+            marginTop: 12,
+            width: "100%",
+          }}
+        />
 
-  <input
-    value={questionPoints}
-    onChange={(e) => setQuestionPoints(e.target.value)}
-    type="number"
-    placeholder="Punti"
-    style={{ padding: 12, fontSize: 18, marginTop: 12, width: 100 }}
-  />
+        <input
+          value={questionPoints}
+          onChange={(e) => setQuestionPoints(e.target.value)}
+          type="number"
+          placeholder="Punti"
+          style={{ padding: 12, fontSize: 18, marginTop: 12, width: 100 }}
+        />
 
-  <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-    <input value={answerA} onChange={(e) => setAnswerA(e.target.value)} placeholder="Risposta A" style={{ padding: 12 }} />
-    <input value={answerB} onChange={(e) => setAnswerB(e.target.value)} placeholder="Risposta B" style={{ padding: 12 }} />
-    <input value={answerC} onChange={(e) => setAnswerC(e.target.value)} placeholder="Risposta C" style={{ padding: 12 }} />
-    <input value={answerD} onChange={(e) => setAnswerD(e.target.value)} placeholder="Risposta D" style={{ padding: 12 }} />
-  </div>
+        <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+          <input value={answerA} onChange={(e) => setAnswerA(e.target.value)} placeholder="Risposta A" style={{ padding: 12 }} />
+          <input value={answerB} onChange={(e) => setAnswerB(e.target.value)} placeholder="Risposta B" style={{ padding: 12 }} />
+          <input value={answerC} onChange={(e) => setAnswerC(e.target.value)} placeholder="Risposta C" style={{ padding: 12 }} />
+          <input value={answerD} onChange={(e) => setAnswerD(e.target.value)} placeholder="Risposta D" style={{ padding: 12 }} />
+        </div>
 
-  <select
-    value={correctIndex}
-    onChange={(e) => setCorrectIndex(e.target.value)}
-    style={{ padding: 12, fontSize: 18, marginTop: 12 }}
-  >
-    <option value="0">Corretta: A</option>
-    <option value="1">Corretta: B</option>
-    <option value="2">Corretta: C</option>
-    <option value="3">Corretta: D</option>
-  </select>
+        <select
+          value={correctIndex}
+          onChange={(e) => setCorrectIndex(e.target.value)}
+          style={{ padding: 12, fontSize: 18, marginTop: 12 }}
+        >
+          <option value="0">Corretta: A</option>
+          <option value="1">Corretta: B</option>
+          <option value="2">Corretta: C</option>
+          <option value="3">Corretta: D</option>
+        </select>
 
-  <button onClick={addQuestion} style={{ padding: 12, marginLeft: 8 }}>
-    Aggiungi domanda
-  </button>
-</section>
+        <button onClick={addQuestion} style={{ padding: 12, marginLeft: 8 }}>
+          Aggiungi domanda
+        </button>
+      </section>
 
-<section style={{ marginTop: 40 }}>
-  <h2>Quiz creati</h2>
+      <section style={{ marginTop: 40 }}>
+        <h2>Quiz creati</h2>
 
-  {quizzes.map((quiz) => (
-    <div key={quiz.id} style={{ border: "1px solid #ddd", padding: 16, marginTop: 12 }}>
-      <h3>{quiz.title}</h3>
-      <p>Slug: {quiz.slug}</p>
-      <p>Domande: {quiz.questions.length}</p>
-      <a href={`/quiz/${quiz.slug}?code=001`} target="_blank">
-        Prova quiz come partecipante 001
-      </a>
-    </div>
-  ))}
-</section>
-
+        {quizzes.map((quiz) => (
+          <div key={quiz.id} style={{ border: "1px solid #ddd", padding: 16, marginTop: 12 }}>
+            <h3>{quiz.title}</h3>
+            <p>Slug: {quiz.slug}</p>
+            <p>Domande: {quiz.questions?.length || 0}</p>
+            <a href={`/quiz/${quiz.slug}?code=001`} target="_blank">
+              Prova quiz come partecipante 001
+            </a>
+          </div>
+        ))}
+      </section>
     </main>
   );
-}
-
-async function addQuiz() {
-  if (!quizTitle) return;
-
-  const res = await fetch("/api/admin/quizzes", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: quizTitle,
-      slug: quizSlug,
-    }),
-  });
-
-  if (!res.ok) {
-    const data = await res.json();
-    alert(data.error || "Errore creazione quiz");
-    return;
-  }
-
-  setQuizTitle("");
-  setQuizSlug("");
-  loadData();
-}
-
-async function addQuestion() {
-  if (!selectedQuizId || !questionText || !answerA || !answerB) {
-    alert("Seleziona quiz, domanda e almeno due risposte");
-    return;
-  }
-
-  const answers = [answerA, answerB, answerC, answerD].filter(Boolean);
-
-  const res = await fetch(`/api/admin/quizzes/${selectedQuizId}/questions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text: questionText,
-      points: Number(questionPoints),
-      answers,
-      correctIndex: Number(correctIndex),
-    }),
-  });
-
-  if (!res.ok) {
-    const data = await res.json();
-    alert(data.error || "Errore creazione domanda");
-    return;
-  }
-
-  setQuestionText("");
-  setQuestionPoints("1");
-  setAnswerA("");
-  setAnswerB("");
-  setAnswerC("");
-  setAnswerD("");
-  setCorrectIndex("0");
-
-  loadData();
 }

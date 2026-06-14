@@ -208,7 +208,3 @@ export const translations = {
 } as const;
 
 export type Language = "en" | "it";
-
-export function getTranslations(lang: Language = "en") {
-  return translations[lang];
-}

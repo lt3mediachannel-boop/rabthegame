@@ -84,6 +84,12 @@ export const translations = {
       download: "Scarica",
     },
 
+    errors: {
+        generic: "Errore",
+        missingData: "Dati mancanti",
+        duplicated: "Elemento già esistente",
+    },
+
     common: {
       save: "Salva",
       cancel: "Annulla",
@@ -179,6 +185,12 @@ export const translations = {
       addQuestion: "Add Question",
       qrCode: "QR Code",
       download: "Download",
+    },
+
+    errors: {
+        generic: "Error",
+        missingData: "Missing data",
+        duplicated: "Element already exists",
     },
 
     common: {

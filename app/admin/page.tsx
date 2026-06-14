@@ -29,6 +29,14 @@ export default function AdminPage() {
     setQuizzes(await qRes.json());
   }
 
+  async function logout() {
+    await fetch("/api/admin/logout", {
+        method: "POST",
+    });
+
+    window.location.href = "/admin-login";
+ }
+
   async function addParticipant() {
     if (!badgeId) return;
 
@@ -119,6 +127,10 @@ export default function AdminPage() {
   return (
     <main style={{ maxWidth: 900, margin: "60px auto", fontFamily: "sans-serif" }}>
       <h1>Admin Panel</h1>
+
+      <button onClick={logout} style={{ padding: 10 }}>
+        Logout
+      </button>
 
       <section style={{ marginTop: 32 }}>
         <h2>Nuovo partecipante</h2>

@@ -30,7 +30,7 @@ export async function GET(
 
   if (!participant) {
     return NextResponse.json(
-      { error: "Partecipante non trovato" },
+      { error: "Participant not found" },
       { status: 404 }
     );
   }

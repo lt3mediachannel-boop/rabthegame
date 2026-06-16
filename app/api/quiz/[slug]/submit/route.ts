@@ -27,7 +27,7 @@ export async function POST(
 
     if (!participant) {
       return NextResponse.json(
-        { error: "Partecipante non trovato" },
+        { error: "Participant not found" },
         { status: 404 }
       );
     }
@@ -61,7 +61,7 @@ export async function POST(
 
     if (existingAttempt?.completed) {
       return NextResponse.json(
-        { error: "Hai già completato questo quiz." },
+        { error: "You have already completed this quiz." },
         { status: 409 }
       );
     }

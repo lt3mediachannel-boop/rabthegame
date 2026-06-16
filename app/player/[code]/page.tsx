@@ -23,89 +23,85 @@ export default async function PlayerPage({
 
   if (!player) {
     return (
-      <main style={{ maxWidth: 600, margin: "60px auto", fontFamily: "sans-serif" }}>
-        <h1>{t.player.participantNotFound}</h1>
-        <p>{t.player.participantNotFoundText}</p>
+      <main className="player-page">
+        <section className="player-card">
+          <h1>{t.player.participantNotFound}</h1>
+          <p>{t.player.participantNotFoundText}</p>
+        </section>
       </main>
     );
   }
 
   return (
-    <main style={{ maxWidth: 700, margin: "60px auto", fontFamily: "sans-serif" }}>
-      <h1>{t.player.title}</h1>
-
-      <div style={{ padding: 24, border: "1px solid #ddd", borderRadius: 12, marginTop: 24 }}>
-        <h2>
-          {t.player.badgeId}: {player.badgeId}
-        </h2>
-
-        <p style={{ fontSize: 32, fontWeight: 700 }}>
-          {player.totalPoints} {t.leaderboard.points.toLowerCase()}
-        </p>
-      </div>
-
-      <h2 style={{ marginTop: 40 }}>{t.player.stations}</h2>
-
-      <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
-        {player.stations.map((station: any) => (
-          <div
-            key={station.id}
-            style={{
-              padding: 18,
-              border: "1px solid #ddd",
-              borderRadius: 12,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div>
-              <strong>{station.name}</strong>
-
-              <div>
-                {station.points} {t.leaderboard.points.toLowerCase()}
-              </div>
-
-              {!station.completed && (
-                <a
-                  href={`/station/${station.slug}`}
-                  style={{ display: "inline-block", marginTop: 8 }}
-                >
-                  {t.player.goToStation}
-                </a>
-              )}
+    <main className="player-page">
+      <section className="player-hero">
+        <div className="robot-wrap" aria-hidden="true">
+          <div className="robot">
+            <div className="robot-antenna" />
+            <div className="robot-head">
+              <div className="robot-eye" />
+              <div className="robot-eye" />
             </div>
-
-            <div style={{ fontSize: 22 }}>
-              {station.completed ? "✅" : "⭕"}
+            <div className="robot-body">
+              <div className="robot-light" />
             </div>
           </div>
-        ))}
-      </div>
-
-      <h2 style={{ marginTop: 40 }}>{t.player.quizzes}</h2>
-
-      {player.quizzes.length === 0 ? (
-        <p>{t.player.noQuizCompleted}</p>
-      ) : (
-        <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
-          {player.quizzes.map((quiz: any, index: number) => (
-            <div
-              key={index}
-              style={{
-                padding: 18,
-                border: "1px solid #ddd",
-                borderRadius: 12,
-              }}
-            >
-              <strong>{quiz.quizTitle}</strong>
-              <div>
-                {t.player.score}: {quiz.score}
-              </div>
-            </div>
-          ))}
         </div>
-      )}
+
+        <div className="player-info-block">
+          <div className="player-badge">Participant #{player.badgeId}</div>
+
+          <h1>{t.player.title}</h1>
+
+          <p className="player-subtitle">
+            Complete challenges, answer quizzes and climb the leaderboard.
+          </p>
+        </div>
+      </section>
+
+      <section className="stats-grid-player">
+        <div className="stat-box primary">
+          <span className="stat-label">{t.player.badgeId}</span>
+          <strong>{player.badgeId}</strong>
+        </div>
+
+        <div className="stat-box gold">
+          <span className="stat-label">{t.player.totalPoints}</span>
+          <strong>
+            {player.totalPoints} {t.leaderboard.points.toLowerCase()}
+          </strong>
+        </div>
+
+        <div className="stat-box cyan">
+          <span className="stat-label">{t.player.quizzes}</span>
+          <strong>{player.quizzes.length}</strong>
+        </div>
+      </section>
+
+      <section className="player-section">
+        <h2>{t.player.quizzes}</h2>
+
+        {player.quizzes.length === 0 ? (
+          <div className="empty-card">
+            <p>{t.player.noQuizCompleted}</p>
+          </div>
+        ) : (
+          <div className="quiz-list">
+            {player.quizzes.map((quiz: any, index: number) => (
+              <article className="quiz-card" key={index}>
+                <div>
+                  <strong>{quiz.quizTitle}</strong>
+                  <p>
+                    {t.player.score}: {quiz.score}
+                  </p>
+                </div>
+
+                <span className="status-pill">Completed</span>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

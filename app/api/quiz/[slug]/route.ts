@@ -10,7 +10,7 @@ export async function GET(
 
   if (!code) {
     return NextResponse.json(
-      { error: "Codice partecipante mancante" },
+      { error: "Participant code missing" },
       { status: 400 }
     );
   }
@@ -26,7 +26,7 @@ export async function GET(
 
   if (!participant) {
     return NextResponse.json(
-      { error: "Partecipante non trovato" },
+      { error: "Participant not found" },
       { status: 404 }
     );
   }
@@ -69,7 +69,7 @@ export async function GET(
   if (existingAttempt?.completed) {
     return NextResponse.json({
       blocked: true,
-      message: "Hai già completato questo quiz.",
+      message: "You have already completed this quiz.",
       score: existingAttempt.score,
     });
   }

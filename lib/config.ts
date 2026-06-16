@@ -1,4 +1,4 @@
-export const APP_NAME = "RAB TheGame";
+export const APP_NAME = "RAB Skills Challenge";
 
 export const DEFAULT_LANGUAGE = "en";
 

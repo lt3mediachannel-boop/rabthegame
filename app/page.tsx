@@ -19,10 +19,10 @@ export default function Home() {
       </h1>
 
       <p style={{ color: "var(--text2)", lineHeight: 1.6 }}>
-        Inserisci il tuo ID badge o scansiona il QR personale per accedere alla dashboard.
+        Scansiona il QR personale per accedere alla dashboard.
       </p>
 
-      <div className="input-block">
+      {/* <div className="input-block">
         <label className="input-label">Il tuo ID partecipante</label>
 
         <div className="input-row">
@@ -37,11 +37,7 @@ export default function Home() {
             Entra →
           </button>
         </div>
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <a className="btn-secondary" href="/leaderboard">🏆 Classifica Live</a>
-        </div>
-      </div>
+      </div> */}
     </main>
   );
 }

@@ -24,6 +24,10 @@ export default function AdminPage() {
   const [answerD, setAnswerD] = useState("");
   const [correctIndex, setCorrectIndex] = useState("0");
 
+  const [stationName, setStationName] = useState("");
+  const [stationSlug, setStationSlug] = useState("");
+  const [stationPoints, setStationPoints] = useState("");
+
   async function loadData() {
     const pRes = await fetch("/api/admin/participants");
     const sRes = await fetch("/api/admin/stations");
@@ -40,18 +44,20 @@ export default function AdminPage() {
   }
 
   async function addParticipant() {
-    if (!badgeId) return;
-
     const res = await fetch("/api/admin/participants", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ badgeId }),
+      body: JSON.stringify({
+        badgeId: badgeId || undefined,
+      }),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      alert("Errore: badge già esistente?");
+      alert(data.error || "Errore creazione partecipante");
       return;
     }
 
@@ -81,6 +87,37 @@ export default function AdminPage() {
 
     setQuizTitle("");
     setQuizSlug("");
+    loadData();
+  }
+
+  async function addStation() {
+    if (!stationName || !stationSlug || !stationPoints) {
+      alert("Insert station name, slug and points");
+      return;
+    }
+
+    const res = await fetch("/api/admin/stations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: stationName,
+        slug: stationSlug,
+        points: Number(stationPoints),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Station creation error");
+      return;
+    }
+
+    setStationName("");
+    setStationSlug("");
+    setStationPoints("");
     loadData();
   }
 
@@ -139,204 +176,273 @@ export default function AdminPage() {
   }
 
   return (
-    <main style={{ maxWidth: 900, margin: "60px auto", fontFamily: "sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>Admin Panel</h1>
-
-        <button onClick={logout} style={{ padding: 10 }}>
-          Logout
-        </button>
-      </div>
-
-      <section style={{ marginTop: 32 }}>
-        <h2>Nuovo partecipante</h2>
-
-        <input
-          value={badgeId}
-          onChange={(e) => setBadgeId(e.target.value)}
-          placeholder="Es. 004"
-          style={{ padding: 12, fontSize: 18 }}
-        />
-
-        <button onClick={addParticipant} style={{ padding: 12, marginLeft: 8 }}>
-          Aggiungi
-        </button>
-      </section>
-
-      <section style={{ marginTop: 40 }}>
-        <h2>Partecipanti</h2>
-
-        <p>Totale partecipanti: {participants.length}</p>
-
-        <a href="/admin/participants" target="_blank">
-          Gestione partecipanti e QR
-        </a>
-      </section>
-
-      <section style={{ marginTop: 40 }}>
-        <h2>Stazioni</h2>
-
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 12 }}>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Slug</th>
-              <th>Punti</th>
-              <th>Attiva</th>
-              <th>Link</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {stations.map((s) => (
-              <tr key={s.id}>
-                <td>{s.name}</td>
-                <td>{s.slug}</td>
-                <td>{s.points}</td>
-                <td>{s.active ? "Sì" : "No"}</td>
-                <td>
-                  <a href={`/station/${s.slug}`} target="_blank">
-                    Apri
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section style={{ marginTop: 40 }}>
-        <a href="/leaderboard" target="_blank">
-          Apri classifica live
-        </a>
-      </section>
-
-      <section style={{ marginTop: 40 }}>
-        <h2>Crea quiz</h2>
-
-        <input
-          value={quizTitle}
-          onChange={(e) => setQuizTitle(e.target.value)}
-          placeholder="Titolo quiz"
-          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-        />
-
-        <input
-          value={quizSlug}
-          onChange={(e) => setQuizSlug(e.target.value)}
-          placeholder="slug opzionale es. quiz-1"
-          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-        />
-
-        <button onClick={addQuiz} style={{ padding: 12 }}>
-          Crea quiz
-        </button>
-      </section>
-
-      <section style={{ marginTop: 40 }}>
-        <h2>Aggiungi domanda</h2>
-
-        <select
-          value={selectedQuizId}
-          onChange={(e) => setSelectedQuizId(e.target.value)}
-          style={{ padding: 12, fontSize: 18, marginRight: 8 }}
-        >
-          <option value="">Seleziona quiz</option>
-          {quizzes.map((q) => (
-            <option key={q.id} value={q.id}>
-              {q.title}
-            </option>
-          ))}
-        </select>
-
-        <input
-          value={questionText}
-          onChange={(e) => setQuestionText(e.target.value)}
-          placeholder="Testo domanda"
-          style={{
-            padding: 12,
-            fontSize: 18,
-            display: "block",
-            marginTop: 12,
-            width: "100%",
-          }}
-        />
-
-        <input
-          value={questionPoints}
-          onChange={(e) => setQuestionPoints(e.target.value)}
-          type="number"
-          placeholder="Punti"
-          style={{ padding: 12, fontSize: 18, marginTop: 12, width: 100 }}
-        />
-
-        <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-          <input
-            value={answerA}
-            onChange={(e) => setAnswerA(e.target.value)}
-            placeholder="Risposta A"
-            style={{ padding: 12 }}
-          />
-
-          <input
-            value={answerB}
-            onChange={(e) => setAnswerB(e.target.value)}
-            placeholder="Risposta B"
-            style={{ padding: 12 }}
-          />
-
-          <input
-            value={answerC}
-            onChange={(e) => setAnswerC(e.target.value)}
-            placeholder="Risposta C"
-            style={{ padding: 12 }}
-          />
-
-          <input
-            value={answerD}
-            onChange={(e) => setAnswerD(e.target.value)}
-            placeholder="Risposta D"
-            style={{ padding: 12 }}
-          />
+    <main className="admin-modern-page">
+      <section className="admin-modern-hero">
+        <div>
+          <div className="hero-badge">⚙️ Control Room</div>
+          <h1>Admin Panel</h1>
+          <p>Manage participants, challenge stations, quizzes and live ranking.</p>
         </div>
 
-        <select
-          value={correctIndex}
-          onChange={(e) => setCorrectIndex(e.target.value)}
-          style={{ padding: 12, fontSize: 18, marginTop: 12 }}
-        >
-          <option value="0">Corretta: A</option>
-          <option value="1">Corretta: B</option>
-          <option value="2">Corretta: C</option>
-          <option value="3">Corretta: D</option>
-        </select>
-
-        <button onClick={addQuestion} style={{ padding: 12, marginLeft: 8 }}>
-          Aggiungi domanda
+        <button onClick={logout} className="admin-logout-btn">
+          Logout
         </button>
       </section>
 
-      <section style={{ marginTop: 40 }}>
-        <h2>Quiz creati</h2>
+      <section className="admin-stats-grid">
+        <div className="admin-stat-card">
+          <span>Participants</span>
+          <strong>{participants.length}</strong>
+        </div>
 
-        {quizzes.map((quiz) => (
-          <div
-            key={quiz.id}
-            style={{
-              border: "1px solid #ddd",
-              padding: 16,
-              marginTop: 12,
-            }}
-          >
-            <h3>{quiz.title}</h3>
-            <p>Slug: {quiz.slug}</p>
-            <p>Domande: {quiz.questions?.length || 0}</p>
+        <div className="admin-stat-card">
+          <span>Stations</span>
+          <strong>{stations.length}</strong>
+        </div>
 
-            <a href={`/quiz/${quiz.slug}?code=001`} target="_blank">
-              Prova quiz come partecipante 001
-            </a>
+        <div className="admin-stat-card">
+          <span>Quizzes</span>
+          <strong>{quizzes.length}</strong>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Nuovo partecipante</h2>
+            <p>Lascia vuoto per generare automaticamente il prossimo ID.</p>
           </div>
-        ))}
+        </div>
+
+        <div className="admin-form-row">
+          <input
+            value={badgeId}
+            onChange={(e) => setBadgeId(e.target.value)}
+            placeholder="Auto, oppure es. 001"
+            className="admin-input"
+          />
+
+          <button onClick={addParticipant} className="admin-primary-btn">
+            Aggiungi
+          </button>
+        </div>
+
+        <div className="admin-link-row">
+          <a href="/admin/participants" target="_blank">
+            Gestione partecipanti e QR →
+          </a>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Stazioni</h2>
+            <p>Crea challenge con slug personalizzato e punti definiti.</p>
+          </div>
+        </div>
+
+        <div className="admin-form-grid station-grid">
+          <input
+            value={stationName}
+            onChange={(e) => setStationName(e.target.value)}
+            placeholder="Station name"
+            className="admin-input"
+          />
+
+          <input
+            value={stationSlug}
+            onChange={(e) => setStationSlug(e.target.value)}
+            placeholder="Custom slug, es. theory-station-moss"
+            className="admin-input"
+          />
+
+          <input
+            value={stationPoints}
+            onChange={(e) => setStationPoints(e.target.value)}
+            type="number"
+            placeholder="Points"
+            className="admin-input"
+          />
+
+          <button onClick={addStation} className="admin-primary-btn">
+            Create station
+          </button>
+        </div>
+
+        <div className="admin-table-wrap">
+          <table className="admin-table-modern">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Slug</th>
+                <th>Punti</th>
+                <th>Attiva</th>
+                <th>Link</th>
+                <th>QR Link</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {stations.map((s) => (
+                <tr key={s.id}>
+                  <td>{s.name}</td>
+                  <td>
+                    <code>{s.slug}</code>
+                  </td>
+                  <td>{s.points}</td>
+                  <td>
+                    <span className={s.active ? "admin-pill active" : "admin-pill inactive"}>
+                      {s.active ? "Sì" : "No"}
+                    </span>
+                  </td>
+                  <td>
+                    <a href={`/station/${s.slug}`} target="_blank">
+                      Apri
+                    </a>
+                  </td>
+                  <td>
+                    <a href={`/station/${s.slug}`} target="_blank">
+                      /station/{s.slug}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Classifica</h2>
+            <p>Apri la classifica live in una nuova finestra.</p>
+          </div>
+
+          <a href="/leaderboard" target="_blank" className="admin-secondary-btn">
+            Apri classifica live
+          </a>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Crea quiz</h2>
+            <p>Definisci titolo e slug del quiz.</p>
+          </div>
+        </div>
+
+        <div className="admin-form-row">
+          <input
+            value={quizTitle}
+            onChange={(e) => setQuizTitle(e.target.value)}
+            placeholder="Titolo quiz"
+            className="admin-input"
+          />
+
+          <input
+            value={quizSlug}
+            onChange={(e) => setQuizSlug(e.target.value)}
+            placeholder="slug opzionale es. quiz-1"
+            className="admin-input"
+          />
+
+          <button onClick={addQuiz} className="admin-primary-btn">
+            Crea quiz
+          </button>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Aggiungi domanda</h2>
+            <p>Seleziona il quiz, inserisci domanda, risposte e risposta corretta.</p>
+          </div>
+        </div>
+
+        <div className="admin-question-form">
+          <select
+            value={selectedQuizId}
+            onChange={(e) => setSelectedQuizId(e.target.value)}
+            className="admin-input"
+          >
+            <option value="">Seleziona quiz</option>
+            {quizzes.map((q) => (
+              <option key={q.id} value={q.id}>
+                {q.title}
+              </option>
+            ))}
+          </select>
+
+          <input
+            value={questionText}
+            onChange={(e) => setQuestionText(e.target.value)}
+            placeholder="Testo domanda"
+            className="admin-input full"
+          />
+
+          <input
+            value={questionPoints}
+            onChange={(e) => setQuestionPoints(e.target.value)}
+            type="number"
+            placeholder="Punti"
+            className="admin-input small"
+          />
+
+          <div className="admin-answer-grid">
+            <input value={answerA} onChange={(e) => setAnswerA(e.target.value)} placeholder="Risposta A" className="admin-input" />
+            <input value={answerB} onChange={(e) => setAnswerB(e.target.value)} placeholder="Risposta B" className="admin-input" />
+            <input value={answerC} onChange={(e) => setAnswerC(e.target.value)} placeholder="Risposta C" className="admin-input" />
+            <input value={answerD} onChange={(e) => setAnswerD(e.target.value)} placeholder="Risposta D" className="admin-input" />
+          </div>
+
+          <div className="admin-form-row">
+            <select
+              value={correctIndex}
+              onChange={(e) => setCorrectIndex(e.target.value)}
+              className="admin-input"
+            >
+              <option value="0">Corretta: A</option>
+              <option value="1">Corretta: B</option>
+              <option value="2">Corretta: C</option>
+              <option value="3">Corretta: D</option>
+            </select>
+
+            <button onClick={addQuestion} className="admin-primary-btn">
+              Aggiungi domanda
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="admin-section-card">
+        <div className="admin-section-head">
+          <div>
+            <h2>Quiz creati</h2>
+            <p>Elenco dei quiz disponibili e link di test.</p>
+          </div>
+        </div>
+
+        <div className="admin-quiz-list">
+          {quizzes.map((quiz) => (
+            <article key={quiz.id} className="admin-quiz-card">
+              <div>
+                <h3>{quiz.title}</h3>
+                <p>
+                  Slug: <code>{quiz.slug}</code>
+                </p>
+                <p>Domande: {quiz.questions?.length || 0}</p>
+              </div>
+
+              <a href={`/quiz/${quiz.slug}?code=001`} target="_blank">
+                Prova quiz come partecipante 001
+              </a>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );

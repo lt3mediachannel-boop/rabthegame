@@ -1,9 +1,9 @@
-export type Language = "it" | "en";
+export type Language = "en" | "it";
 
 export const translations = {
   it: {
     app: {
-      name: "RAB TheGame",
+      name: "RAB Skills Challenge",
       subtitle: "Challenge Arena",
     },
 
@@ -105,7 +105,7 @@ export const translations = {
 
   en: {
     app: {
-      name: "RAB TheGame",
+      name: "RAB Skills Challenge",
       subtitle: "Challenge Arena",
     },
 

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     if (!participant) {
       return NextResponse.json(
-        { error: "Partecipante non trovato" },
+        { error: "Participant not found" },
         { status: 404 }
       );
     }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Punti già assegnati per questa stazione" },
+      { error: "Points already been assigned" },
       { status: 409 }
     );
   }

@@ -64,6 +64,8 @@ model QuizQuestion {
   text   String
   points Int    @default(1)
   order  Int
+  imageUrl1 String?
+  imageUrl2 String?
 
   quiz      Quiz           @relation(fields: [quizId], references: [id])
   answers   QuizAnswer[]

@@ -14,6 +14,8 @@ export async function POST(
       points,
       answers,
       correctIndex,
+      imageUrl1,
+      imageUrl2,
     } = body;
 
     if (!text || !answers || answers.length < 2) {
@@ -38,6 +40,8 @@ export async function POST(
         text,
         points: Number(points || 1),
         order: lastQuestion ? lastQuestion.order + 1 : 1,
+        imageUrl1: imageUrl1 || null,
+        imageUrl2: imageUrl2 || null,
         answers: {
           create: answers.map((answerText: string, index: number) => ({
             text: answerText,

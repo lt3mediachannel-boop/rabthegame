@@ -285,6 +285,18 @@ export default function QuizPage({
 
             <h2>{q.text}</h2>
 
+            {(q.imageUrl1 || q.imageUrl2) && (
+              <div className="quiz-question-images">
+                {q.imageUrl1 && (
+                  <img src={q.imageUrl1} alt={`Question ${index + 1} image 1`} />
+                )}
+
+                {q.imageUrl2 && (
+                  <img src={q.imageUrl2} alt={`Question ${index + 1} image 2`} />
+                )}
+              </div>
+            )}
+
             <div className="quiz-options">
               {q.answers.map((a: any) => {
                 const isSelected = selected[q.id] === a.id;

@@ -1499,3 +1499,30 @@ tr:last-child td {
     width: 100%;
   }
 }
+
+.quiz-question-images {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 18px 0 20px;
+}
+
+.quiz-question-images img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 8px;
+}
+
+@media (max-width: 680px) {
+  .quiz-question-images {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-question-images img {
+    max-height: 260px;
+  }
+}

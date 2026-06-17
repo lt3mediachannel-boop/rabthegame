@@ -18,6 +18,8 @@ export default function AdminPage() {
   const [selectedQuizId, setSelectedQuizId] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [questionPoints, setQuestionPoints] = useState("1");
+  const [questionImageUrl1, setQuestionImageUrl1] = useState("");
+  const [questionImageUrl2, setQuestionImageUrl2] = useState("");
   const [answerA, setAnswerA] = useState("");
   const [answerB, setAnswerB] = useState("");
   const [answerC, setAnswerC] = useState("");
@@ -139,6 +141,8 @@ export default function AdminPage() {
         points: Number(questionPoints),
         answers,
         correctIndex: Number(correctIndex),
+        imageUrl1: questionImageUrl1,
+        imageUrl2: questionImageUrl2,
       }),
     });
 
@@ -155,6 +159,8 @@ export default function AdminPage() {
     setAnswerC("");
     setAnswerD("");
     setCorrectIndex("0");
+    setQuestionImageUrl1("");
+    setQuestionImageUrl2("");
 
     loadData();
   }
@@ -381,6 +387,20 @@ export default function AdminPage() {
             value={questionText}
             onChange={(e) => setQuestionText(e.target.value)}
             placeholder="Testo domanda"
+            className="admin-input full"
+          />
+
+          <input
+            value={questionImageUrl1}
+            onChange={(e) => setQuestionImageUrl1(e.target.value)}
+            placeholder="Question image URL 1, es. /uploads/image1.jpg"
+            className="admin-input full"
+          />
+
+          <input
+            value={questionImageUrl2}
+            onChange={(e) => setQuestionImageUrl2(e.target.value)}
+            placeholder="Question image URL 2, es. /uploads/image2.jpg"
             className="admin-input full"
           />
 
